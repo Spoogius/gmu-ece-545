@@ -11,29 +11,29 @@ end Sorting_TB;
 
 architecture Behavioral of Sorting_TB is
 
--- W = Data Width
--- N = Array Size
--- K >= log2(N)
-
-
+-- WHEN RUNNING POST-SYNTHESIS or POST-IMPLEMENTATION SIMULATION
+-- APPROPRIATE GENERIC VALUES FOR W AND K MUST BE SET UNDER
+-- settings->general->Generics/Paramers 
+-- AND THE GENERIC MAP () BLOCK DURING DUT INSTANTIATION MUST
+-- BE COMMENTED OUT.
 
 -- Case i
-CONSTANT N : integer := 16; CONSTANT W : integer := 8; CONSTANT K : integer := 4;
-FILE InputFile  : TEXT OPEN READ_MODE is "case_i_input.ascii";
-FILE OutputFile : TEXT OPEN READ_MODE is "case_i_output.ascii";
+--CONSTANT N : integer := 16; CONSTANT W : integer := 8; CONSTANT K : integer := 4;
+--FILE InputFile  : TEXT OPEN READ_MODE is "case_i_input.ascii";
+--FILE OutputFile : TEXT OPEN READ_MODE is "case_i_output.ascii";
+--CONSTANT ClkPeriod : time := 29 ns; --4/3 * worst clock period
 
 -- Case ii
---CONSTANT N : integer := 16; CONSTANT W : integer := 16; CONSTANT K : integer := 4;
---FILE InputFile  : TEXT OPEN READ_MODE is "case_ii/input.ascii";
---FILE OutputFile : TEXT OPEN READ_MODE is "case_ii/output.ascii";
+CONSTANT N : integer := 16; CONSTANT W : integer := 16; CONSTANT K : integer := 4;
+FILE InputFile  : TEXT OPEN READ_MODE is "case_ii_input.ascii";
+FILE OutputFile : TEXT OPEN READ_MODE is "case_ii_output.ascii";
+CONSTANT ClkPeriod : time := 36 ns; --4/3 * worst clock period
 
 -- Case iii
 --CONSTANT N : integer := 32; CONSTANT W : integer := 16; CONSTANT K : integer := 5;
---FILE InputFile  : TEXT OPEN READ_MODE is "case_iii/input.ascii";
---FILE OutputFile : TEXT OPEN READ_MODE is "case_iii/output.ascii";
-
--- Sim Constants
-CONSTANT ClkPeriod : time := 10ns;
+--FILE InputFile  : TEXT OPEN READ_MODE is "case_iii_input.ascii";
+--FILE OutputFile : TEXT OPEN READ_MODE is "case_iii_output.ascii";
+--CONSTANT ClkPeriod : time := 29 ns; --4/3 * worst clock period
 
 -- TB Signals
 signal clk     : std_logic := '0';
@@ -50,11 +50,11 @@ signal DataOut_expected : std_logic_vector( W-1 downto 0 ) := ( others => '0' );
 
 begin
   	
-DUT: entity work.Sorting(structural)
-  generic map(
-    w => W,
-    k => K
-  )
+DUT: entity work.Sorting
+--  generic map(
+--    w => W,
+--    k => K
+--  )
   port map(
     -- Inputs
     clk => clk,
@@ -85,29 +85,29 @@ variable file_addr : std_logic_vector( K-1 downto 0 ) := (others => '0');
 variable addr_int : integer := 0;
 
 variable ReportStatement : line;
---variable msg_str_time : string := "Time: ";
---variable msg_str_actual : string := "ns, Actual Output: 0x";
---variable msg_str_expected : string := "Expected Output: 0x";
 
 begin
 
+  -- Cycle Reset
   reset <= '1';
   wait for 2*ClkPeriod;
  
   reset <= '0';
   wait for ClkPeriod;
-  
-
   while not endfile (InputFile) loop
     
+    -- Read file line
     readline(InputFile, VectorLine);
     
+    -- Parse and verify values
     hread(VectorLine, file_addr, good=>VectorValid );
     NEXT WHEN NOT VectorValid;
     read(VectorLine, space );
     hread(VectorLine, file_data);
     
     wait until falling_edge(clk);
+    
+    -- Write Data into DUT
     WrInit <= '1';
     Radd <= file_addr;
     DataIn <= file_data;
@@ -115,20 +115,22 @@ begin
   end loop;
   
   wait for ClkPeriod;
-  Radd <= ( others => '0' );
   
   WrInit <= '0';
-  wait for 2*ClkPeriod;
+  Radd <= ( others => '0' );
   s <= '1';
   
+  -- Wait until finished
   wait until (done = '1');
   s <= '0';
   wait until (done = '0');
-
+  wait for ClkPeriod;
+  
+  
+  wait until rising_edge(clk);
   Rd <= '1';
   while not endfile (OutputFile) loop
-    addr_int := addr_int + 1;
-    Radd <= std_logic_vector( to_unsigned( addr_int, K ) );
+    
     
     readline(OutputFile, VectorLine);
     
@@ -137,10 +139,15 @@ begin
     read(VectorLine, space );
     hread(VectorLine, file_data);
   
+    Radd <= std_logic_vector( file_addr );
+    
     wait for ClkPeriod/8;
     DataOut_expected <= file_data;
-    wait for ClkPeriod/8;
     
+    wait for  5*(ClkPeriod/8);
+
+    -- Compare read back data with expected output.
+    -- Print ReportStatment if mismatched
     if ( DataOut_expected /= DataOut ) then
       write( ReportStatement, "Time: " & integer'image( now / 1 ns ) & "ns, Actual Output: 0x" );
       hwrite( ReportStatement, DataOut );
@@ -148,8 +155,8 @@ begin
       hwrite( ReportStatement, DataOut_expected );
       writeline( output, ReportStatement );
     end if;
-      
-    wait for 3*(ClkPeriod/4);
+
+    wait for (ClkPeriod/4);
   end loop;
   
   Rd <= '0';

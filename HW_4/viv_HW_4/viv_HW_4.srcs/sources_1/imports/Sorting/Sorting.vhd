@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity Sorting is
   generic(
    	w:integer := 8;
-	k:integer := 4
+	  k:integer := 4
   );
   port(
   	clk: in std_logic;
