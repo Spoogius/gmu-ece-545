@@ -2,8 +2,8 @@ import random
 import math
 
 for param in [ {'Case':'i','N':16,'W':8}, {'Case':'ii','N':16,'W':16}, {'Case':'iii','N':32,'W':16} ]:
-    fout_input  = open(f"case_{param['Case']}/input.ascii" , 'w')
-    fout_output = open(f"case_{param['Case']}/output.ascii", 'w')
+    fout_input  = open(f"case_{param['Case']}_input.ascii" , 'w')
+    fout_output = open(f"case_{param['Case']}_output.ascii", 'w')
 
    
     data_vals = random.sample( range(0, (2**param['W'])-1 ), param['N'] )
