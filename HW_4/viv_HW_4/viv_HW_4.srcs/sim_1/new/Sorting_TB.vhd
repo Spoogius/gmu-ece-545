@@ -15,25 +15,32 @@ architecture Behavioral of Sorting_TB is
 -- APPROPRIATE GENERIC VALUES FOR W AND K MUST BE SET UNDER
 -- settings->general->Generics/Paramers 
 -- AND THE GENERIC MAP () BLOCK DURING DUT INSTANTIATION MUST
--- BE COMMENTED OUT.
+-- BE COMMENTED OUT ON LINE 61-64.
+
+-- Clock Period for behavior simulation
+-- Comment out for Synth & Imp simulation
+CONSTANT ClkPeriod : time := 10 ns; --4/3 * worst clock period
 
 -- Case i
---CONSTANT N : integer := 16; CONSTANT W : integer := 8; CONSTANT K : integer := 4;
---FILE InputFile  : TEXT OPEN READ_MODE is "case_i_input.ascii";
---FILE OutputFile : TEXT OPEN READ_MODE is "case_i_output.ascii";
---CONSTANT ClkPeriod : time := 29 ns; --4/3 * worst clock period
+CONSTANT N : integer := 16; CONSTANT W : integer := 8; CONSTANT K : integer := 4;
+FILE InputFile  : TEXT OPEN READ_MODE is "case_i_input.ascii";
+FILE OutputFile : TEXT OPEN READ_MODE is "case_i_output.ascii";
+--CONSTANT ClkPeriod : time := 28 ns; --4/3 * worst clock period - SYNTH
+--CONSTANT ClkPeriod : time := 14 ns; --4/3 * worst clock period - IMP
 
 -- Case ii
-CONSTANT N : integer := 16; CONSTANT W : integer := 16; CONSTANT K : integer := 4;
-FILE InputFile  : TEXT OPEN READ_MODE is "case_ii_input.ascii";
-FILE OutputFile : TEXT OPEN READ_MODE is "case_ii_output.ascii";
-CONSTANT ClkPeriod : time := 36 ns; --4/3 * worst clock period
+--CONSTANT N : integer := 16; CONSTANT W : integer := 16; CONSTANT K : integer := 4;
+--FILE InputFile  : TEXT OPEN READ_MODE is "case_ii_input.ascii";
+--FILE OutputFile : TEXT OPEN READ_MODE is "case_ii_output.ascii";
+--CONSTANT ClkPeriod : time := 36 ns; --4/3 * worst clock period - SYNTH
+--CONSTANT ClkPeriod : time := 20 ns; --4/3 * worst clock period - IMP
 
 -- Case iii
 --CONSTANT N : integer := 32; CONSTANT W : integer := 16; CONSTANT K : integer := 5;
 --FILE InputFile  : TEXT OPEN READ_MODE is "case_iii_input.ascii";
 --FILE OutputFile : TEXT OPEN READ_MODE is "case_iii_output.ascii";
---CONSTANT ClkPeriod : time := 29 ns; --4/3 * worst clock period
+--CONSTANT ClkPeriod : time := 36 ns; --4/3 * worst clock period - SYNTH
+--CONSTANT ClkPeriod : time := 20 ns; --4/3 * worst clock period - IMP
 
 -- TB Signals
 signal clk     : std_logic := '0';
@@ -51,10 +58,10 @@ signal DataOut_expected : std_logic_vector( W-1 downto 0 ) := ( others => '0' );
 begin
   	
 DUT: entity work.Sorting
---  generic map(
---    w => W,
---    k => K
---  )
+  generic map(
+    w => W,
+    k => K
+  )
   port map(
     -- Inputs
     clk => clk,
@@ -106,11 +113,12 @@ begin
     hread(VectorLine, file_data);
     
     wait until falling_edge(clk);
+    wait until falling_edge(clk);
     
     -- Write Data into DUT
-    WrInit <= '1';
     Radd <= file_addr;
     DataIn <= file_data;
+    WrInit <= '1';
     
   end loop;
   
@@ -127,8 +135,8 @@ begin
   wait for ClkPeriod;
   
   
-  wait until rising_edge(clk);
-  Rd <= '1';
+
+
   while not endfile (OutputFile) loop
     
     
@@ -140,9 +148,11 @@ begin
     hread(VectorLine, file_data);
   
     Radd <= std_logic_vector( file_addr );
+    wait until rising_edge(clk);
+    Rd <= '1';
     
     wait for ClkPeriod/8;
-    DataOut_expected <= file_data;
+    DataOut_expected <= x"8" & file_data(11 downto 0 );
     
     wait for  5*(ClkPeriod/8);
 
@@ -155,10 +165,10 @@ begin
       hwrite( ReportStatement, DataOut_expected );
       writeline( output, ReportStatement );
     end if;
-
-    wait for (ClkPeriod/4);
+    wait for ClkPeriod/8;
   end loop;
   
+  wait until rising_edge(clk);
   Rd <= '0';
   DataOut_expected <= ( others => '0' );
   
