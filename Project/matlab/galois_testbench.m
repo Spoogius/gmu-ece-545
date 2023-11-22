@@ -15,4 +15,32 @@ for a_val = [0:(2^m)-1]
         end
     end
 end
-fprintf("All Test Cases Passed\n" );
+fprintf("All Scalar Operations Test Cases Passed\n" );
+
+for rand_idx = [0:(2^m)-1]
+    shared_size = 1+randi(15);
+    a_size_1 = 1+randi(15);
+    b_size_2 = 1+randi(15);
+
+    % Create as Square matricies for adding
+    a = gf(randi((2^m)-1, shared_size,shared_size), m );
+    b = gf(randi((2^m)-1, shared_size,shared_size), m );
+
+    if ~all(all(galois.mathworks_galois_matrix_add( a, b ) == galois.galois_matrix_add( a, b )))
+        fprintf("Galois Matrix Add failed in case:\n");
+        display(a)
+        display(b)
+    end
+
+    % Reshape to not nessecarily be square for multiplication
+    a = gf(randi((2^m)-1, a_size_1,shared_size), m );
+    b = gf(randi((2^m)-1, shared_size,b_size_2), m );
+
+    if ~all(all(galois.mathworks_galois_matrix_multiply( a, b ) == galois.galois_matrix_multiply( a, b )))
+        fprintf("Galois Matrix Multiply failed in case:\n");
+        display(a)
+        display(b)
+    end
+end
+fprintf("All Matrix Test Cases Passed\n" );
+
