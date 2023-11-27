@@ -11,7 +11,7 @@ v = 58;
 o = 8;
 k = 9;
 
-for fname = ["epk", "sig", "s", "y" ]
+for fname = ["epk", "sig", "s", "y", "y_long", "f_tail" ]
     fin = fopen( sprintf("c_data/%s.bin", fname), 'r' );
     eval( sprintf( "%s_golden = fread( fin, 'uint8=>uint8');", fname ), fin );
     fclose( fin );
