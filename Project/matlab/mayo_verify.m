@@ -32,13 +32,16 @@ P2 = P2{:};
 P3  = cellfun(@(val) gf(val,galois_param) , {P3} , 'UniformOutput', false);
 P3 = P3{:};
 
-y = gf( zeros(m,1), galois_param );
+y_long = gf( zeros(2*m,1), galois_param );
+P = gf(zeros( n, n ), galois_param );
 l = 0; 
+
 for ii = [0:k-1]
-    for jj = [k-1:ii]
+    for jj = [k-1:-1:ii]
+        %fprintf("Loop Ittr: ii: %d jj: %d\n", ii, jj )
         u = gf( zeros(m,1), galois_param );
         for aa = 1:m
-            P = gf(zeros( n, n ), galois_param );
+            
             P(1:n-o, 1:n-o) = P1(:,:,aa);
             P(1:n-o, n-o + [1:o] ) = P2(:,:,aa);
             P(n-o + [1:o], n-o + [1:o] ) = P3(:,:,aa);
@@ -55,10 +58,30 @@ for ii = [0:k-1]
                     );
             end
         end
-        % ? What is E?
-        %E = ones( m, m );
-        y = galois.galois_matrix_add( y, u );
+        for kk = [1:m]
+            y_long(kk + l) = y_long(kk + l) + u(kk);
+        end
+
         l = l + 1;
+
     end
 end
-fprintf("Passed?: %d\n", sum( y==y_golden) == m );
+
+if ~all( y_long == y_long_golden )
+    error("Error: Mismatch between y_long & y_long_golden\n" );
+end
+fprintf("Pass: y_long == y_long_golden\n" );
+
+F_TAIL_LEN = 5; %Constant
+for idx_o = [m + k * (k + 1) / 2 - 2 : -1 : m]
+
+    for idx_i = [1:F_TAIL_LEN]
+        y_long( idx_o - m + idx_i ) = y_long( idx_o - m + idx_i ) + mayo_func.mul_f(y_long( idx_o + 1 ), gf(f_tail_golden(idx_i),4));
+    end
+    y_long( idx_o + 1 ) = gf(0,4);
+    
+end
+y = y_long(1:m);
+
+fprintf("Verify Passed?: %d\n", sum( y==y_golden) == m );
+
