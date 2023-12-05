@@ -32,8 +32,14 @@ P2 = P2{:};
 P3  = cellfun(@(val) gf(val,galois_param) , {P3} , 'UniformOutput', false);
 P3 = P3{:};
 
+P = gf( zeros(n,n,m), galois_param );
+for aa = [1:m]
+    P(1:n-o, 1:n-o, aa ) = P1(:,:,aa);
+    P(1:n-o, n-o + [1:o], aa) = P2(:,:,aa);
+    P(n-o + [1:o], n-o + [1:o] , aa) = P3(:,:,aa);
+end
+
 y_long = gf( zeros(2*m,1), galois_param );
-P = gf(zeros( n, n ), galois_param );
 l = 0; 
 
 for ii = [0:k-1]
@@ -41,20 +47,15 @@ for ii = [0:k-1]
         %fprintf("Loop Ittr: ii: %d jj: %d\n", ii, jj )
         u = gf( zeros(m,1), galois_param );
         for aa = 1:m
-            
-            P(1:n-o, 1:n-o) = P1(:,:,aa);
-            P(1:n-o, n-o + [1:o] ) = P2(:,:,aa);
-            P(n-o + [1:o], n-o + [1:o] ) = P3(:,:,aa);
-
             if ii == jj
                 % Si_T*P*Si
-                u(aa) = galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(ii+1,:), P), s_i(ii+1,:).');
+                u(aa) = galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(ii+1,:), P(:,:,aa)), s_i(ii+1,:).');
             else
                 % Si_T*P*Sj + Sj_T*P*Si
                 %u(aa) = s_i(ii,:) * P * s_i(jj,:).' + s_i(jj,:) * P * s_i(ii,:).';
                 u(aa) = galois.galois_matrix_add( ...
-                    galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(ii+1,:), P), s_i(jj+1,:).'), ...
-                    galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(jj+1,:), P), s_i(ii+1,:).')  ...
+                    galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(ii+1,:), P(:,:,aa)), s_i(jj+1,:).'), ...
+                    galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(jj+1,:), P(:,:,aa)), s_i(ii+1,:).')  ...
                     );
             end
         end
