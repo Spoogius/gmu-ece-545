@@ -44,8 +44,8 @@ l = 0;
 
 for ii = [0:k-1]
     for jj = [k-1:-1:ii]
-        %fprintf("Loop Ittr: ii: %d jj: %d\n", ii, jj )
         u = gf( zeros(m,1), galois_param );
+        %fprintf("[ii]: %d [jj]: %d\n", ii, jj );
         for aa = 1:m
             if ii == jj
                 % Si_T*P*Si
@@ -58,10 +58,11 @@ for ii = [0:k-1]
                     galois.mathworks_galois_matrix_multiply( galois.mathworks_galois_matrix_multiply( s_i(jj+1,:), P(:,:,aa)), s_i(ii+1,:).')  ...
                     );
             end
+            y_long(aa + l) = y_long(aa + l) + u(aa);
         end
-        for kk = [1:m]
-            y_long(kk + l) = y_long(kk + l) + u(kk);
-        end
+        % for kk = [1:m]
+        %     y_long(kk + l) = y_long(kk + l) + u(kk);
+        % end
 
         l = l + 1;
 

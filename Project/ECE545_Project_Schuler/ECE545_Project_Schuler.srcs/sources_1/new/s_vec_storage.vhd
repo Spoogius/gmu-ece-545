@@ -16,8 +16,10 @@ entity s_vec_storage is
     load  : in std_logic;
     done : out std_logic;
     data_in : in std_logic_vector( 7 downto 0 );
-    rd_addr : in std_logic_vector( natural(ceil(log2(real(K)))) - 1 downto 0 );
-    rd_data : out n_mat_1d
+    rd_addr_0 : in std_logic_vector( natural(ceil(log2(real(K)))) - 1 downto 0 );
+    rd_data_0 : out n_mat_1d;
+    rd_addr_1 : in std_logic_vector( natural(ceil(log2(real(K)))) - 1 downto 0 );
+    rd_data_1 : out n_mat_1d
     
   );
 end s_vec_storage;
@@ -34,7 +36,8 @@ signal wr_addr :  std_logic_vector( natural(ceil(log2(real(K)))) - 1 downto 0 ) 
 
 begin
 
-rd_data <= data_store( to_integer( unsigned(rd_addr ) ) );
+rd_data_0 <= data_store( to_integer( unsigned(rd_addr_0 ) ) );
+rd_data_1 <= data_store( to_integer( unsigned(rd_addr_1 ) ) );
 
 -- RAM Process
 -- Read back asynchronous

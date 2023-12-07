@@ -38,6 +38,7 @@ log_sum <= std_logic_vector(to_unsigned(
               to_integer(unsigned( lut_res_0 )) +
               to_integer(unsigned( lut_res_1 )),
               GALOIS_WIDTH + 1 ));
-out_0 <= LUT_ALOG(to_integer(unsigned( LUT_MOD_15( to_integer(unsigned(log_sum)) ) )) );
+out_0 <= x"0" when (in_0 = x"0") or (in_1 = x"0" ) 
+              else LUT_ALOG(to_integer(unsigned( LUT_MOD_15( to_integer(unsigned(log_sum)) ) )) );
 
 end Behavioral;

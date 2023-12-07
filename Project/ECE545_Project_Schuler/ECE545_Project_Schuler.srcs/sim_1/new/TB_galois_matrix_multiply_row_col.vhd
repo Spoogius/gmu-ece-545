@@ -6,6 +6,7 @@ library std;
 use std.textio.all;
 
 use work.PKG_matrix_types.all;
+
 entity TB_galois_matrix_multiply_row_col is
 --  Port ( );
 end TB_galois_matrix_multiply_row_col;

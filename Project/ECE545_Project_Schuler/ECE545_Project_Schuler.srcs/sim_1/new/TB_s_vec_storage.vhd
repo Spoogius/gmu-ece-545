@@ -21,8 +21,8 @@ signal load : std_logic := '0';
 signal s_vec_storage_done : std_logic := '0';
 
 signal data_in : std_logic_vector( 7 downto 0 ) := ( others => '0' );
-signal rd_addr : std_logic_vector( natural(ceil(log2(real(PKG_K)))) - 1 downto 0 ) := ( others => '0' );
-signal rd_data : n_mat_1d := ( others => ( others => '0' ) );
+signal rd_addr_0, rd_addr_1 : std_logic_vector( natural(ceil(log2(real(PKG_K)))) - 1 downto 0 ) := ( others => '0' );
+signal rd_data_0, rd_data_1 : n_mat_1d := ( others => ( others => '0' ) );
 
 constant CLK_PERIOD : time := 20 ns;
 
@@ -38,8 +38,10 @@ dut: entity work.s_vec_storage
     load => load,
     done => s_vec_storage_done,
     data_in => data_in,
-    rd_addr => rd_addr,
-    rd_data => rd_data
+    rd_addr_0 => rd_addr_0,
+    rd_data_0 => rd_data_0,
+    rd_addr_1 => rd_addr_1,
+    rd_data_1 => rd_data_1
   );
 
 
@@ -81,15 +83,15 @@ begin
   load <= '0';
   
   for s_idx in 0 to PKG_K - 1 loop
-    rd_addr <= std_logic_vector( to_unsigned( s_idx, natural(ceil(log2(real(PKG_K)))) ) );
+    rd_addr_0 <= std_logic_vector( to_unsigned( s_idx, natural(ceil(log2(real(PKG_K)))) ) );
     wait for CLK_PERIOD;
     for s_i_idx in 0 to PKG_N - 1 loop
       readline( s_golden_file, vector_line );
       hread( vector_line, file_s_data , good=>vector_valid );
       
       total_values := total_values + 1;
-      if file_s_data /= rd_data( s_i_idx ) then
-        report "[Warning] S: " & integer'image(s_idx) & " S_i: " & integer'image(s_i_idx) & " Expected: " & to_hstring(file_s_data) & " Read: " & to_hstring(rd_data( s_i_idx ))
+      if file_s_data /= rd_data_0( s_i_idx ) then
+        report "[Warning] S: " & integer'image(s_idx) & " S_i: " & integer'image(s_i_idx) & " Expected: " & to_hstring(file_s_data) & " Read: " & to_hstring(rd_data_0( s_i_idx ))
               severity warning;
       else
         correct_values := correct_values + 1;
