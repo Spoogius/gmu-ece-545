@@ -17,7 +17,7 @@ signal wr_en : std_logic := '0';
 signal wr_data_in    : m_mat_1d := (others => (others => '0'));
 signal wr_row_idx    : std_logic_vector( natural(ceil(log2(real(PKG_N)))) - 1 downto 0 ) := (others => '0');
 signal wr_col_idx    : std_logic_vector( natural(ceil(log2(real(PKG_N)))) - 1 downto 0 ) := (others => '0');
-signal rd_slice_idx  : std_logic_vector( natural(log2(real(PKG_M))) - 1 downto 0 ) := (others => '0');
+signal rd_slice_addr  : std_logic_vector( natural(log2(real(PKG_M))) - 1 downto 0 ) := (others => '0');
 signal rd_slice_data : nxn_mat_2d := (others => (others => (others => '0')));
 
 
@@ -35,7 +35,7 @@ dut: entity work.epk_slice_storage
     wr_data_in => wr_data_in,
     wr_row_idx => wr_row_idx,
     wr_col_idx => wr_col_idx,
-    rd_slice_idx => rd_slice_idx,
+    rd_slice_addr => rd_slice_addr,
     rd_slice_data => rd_slice_data
   );
 
@@ -60,7 +60,7 @@ begin
   end loop;
   
   for slice_idx in 0 to PKG_M loop
-    rd_slice_idx <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
+    rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
     wait for CLK_PERIOD;
   end loop;
 
@@ -70,7 +70,7 @@ begin
   wait for CLK_PERIOD;
   
   for slice_idx in 0 to PKG_M loop
-    rd_slice_idx <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
+    rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
     wait for CLK_PERIOD;
   end loop;
   

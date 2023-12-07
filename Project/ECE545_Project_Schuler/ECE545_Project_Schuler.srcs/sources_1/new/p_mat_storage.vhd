@@ -20,7 +20,7 @@ entity p_mat_storage is
     load  : in std_logic;
     done : out std_logic;
     data_in : in std_logic_vector( 7 downto 0 );
-    rd_slice_idx : in std_logic_vector( natural(log2(real(M))) - 1 downto 0 );
+    rd_slice_addr : in std_logic_vector( natural(log2(real(M))) - 1 downto 0 );
     rd_slice_data : out nxn_mat_2d
     
   );
@@ -39,7 +39,7 @@ inst_p_mat_storage_datapath: entity work.p_mat_storage_datapath
     clk => clk,
     rst => rst,
     data_in => data_in,
-    storage_rd_slice_idx => rd_slice_idx,
+    storage_rd_slice_addr => rd_slice_addr,
     storage_rd_slice_data => rd_slice_data,
     decode_en => decode_en,
     decode_data_ready => decode_data_ready,

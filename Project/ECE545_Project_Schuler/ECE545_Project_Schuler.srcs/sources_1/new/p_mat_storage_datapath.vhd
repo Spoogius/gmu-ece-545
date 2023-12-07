@@ -16,7 +16,7 @@ Generic(
     rst : in std_logic;
     
     data_in : in std_logic_vector( 7 downto 0 );
-    storage_rd_slice_idx : in std_logic_vector( natural(log2(real(M))) - 1 downto 0 );
+    storage_rd_slice_addr : in std_logic_vector( natural(log2(real(M))) - 1 downto 0 );
     storage_rd_slice_data : out nxn_mat_2d;
     
     -- From Controller
@@ -44,7 +44,7 @@ inst_epk_slice_storage: entity work.epk_slice_storage
     wr_data_in => bitsliced_data,
     wr_row_idx => storage_row_idx,
     wr_col_idx => storage_col_idx,
-    rd_slice_idx => storage_rd_slice_idx,
+    rd_slice_addr => storage_rd_slice_addr,
     rd_slice_data => storage_rd_slice_data 
   );
   

@@ -21,7 +21,7 @@ signal load  : std_logic := '0';
 signal p_mat_storage_done : std_logic := '0';
 
 signal data_in : std_logic_vector( 7 downto 0 ) := ( others => '0' );
-signal rd_slice_idx : std_logic_vector( natural(log2(real(PKG_M))) - 1 downto 0 ) := ( others => '0' );
+signal rd_slice_addr : std_logic_vector( natural(log2(real(PKG_M))) - 1 downto 0 ) := ( others => '0' );
 signal rd_slice_data : nxn_mat_2d := ( others => ( others => ( others => '0' ) ) );
 
 -- DEBUG SIGNALS
@@ -38,7 +38,7 @@ dut: entity work.p_mat_storage
     load => load,
     done => p_mat_storage_done,
     data_in => data_in, 
-    rd_slice_idx  => rd_slice_idx,
+    rd_slice_addr  => rd_slice_addr,
     rd_slice_data => rd_slice_data
   );
 
@@ -89,7 +89,7 @@ begin
   
   for slice_idx in 0 to PKG_M-1 loop
   --for slice_idx in 0 to 2 loop
-    rd_slice_idx <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
+    rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
     wait for CLK_PERIOD;
       for row_idx in 0 to PKG_N-1 loop
         for col_idx in 0 to PKG_N-1 loop
@@ -120,7 +120,7 @@ begin
         severity error;
   end if;
   
-  rd_slice_idx <= (others=> '0');
+  rd_slice_addr <= (others=> '0');
   wait;
 end process;
 

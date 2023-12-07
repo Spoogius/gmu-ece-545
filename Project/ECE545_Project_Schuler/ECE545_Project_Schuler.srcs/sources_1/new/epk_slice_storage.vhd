@@ -17,7 +17,7 @@ entity epk_slice_storage is
     wr_data_in : in m_mat_1d;
     wr_row_idx : in std_logic_vector( natural(ceil(log2(real(N)))) - 1 downto 0 );
     wr_col_idx : in std_logic_vector( natural(ceil(log2(real(N)))) - 1 downto 0 );
-    rd_slice_idx : in std_logic_vector( natural(log2(real(M))) - 1 downto 0 );
+    rd_slice_addr : in std_logic_vector( natural(log2(real(M))) - 1 downto 0 );
     rd_slice_data : out nxn_mat_2d
   );
 end epk_slice_storage;
@@ -41,7 +41,7 @@ begin
 --slice_2 <= tmp_data_store(2);
 --slice_3 <= tmp_data_store(3);
 
-rd_slice_data <= data_store(to_integer(unsigned( rd_slice_idx ) ) );
+rd_slice_data <= data_store(to_integer(unsigned( rd_slice_addr ) ) );
 
 
 process( clk, rst )
