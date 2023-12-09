@@ -10,8 +10,10 @@ package PKG_matrix_types is
   CONSTANT PKG_P1_BYTES : integer := 54752;
   CONSTANT PKG_P2_BYTES : integer := 14848;
   CONSTANT PKG_P3_BYTES : integer := 1152;
-
+  CONSTANT PKG_F_TAIL_LEN : integer := 5;
   
+  type TYPE_F_TAIL is array( 0 to PKG_F_TAIL_LEN-1 ) of std_logic_vector( 3 downto 0 );
+  CONSTANT PKG_F_TAIL : TYPE_F_TAIL := ( x"8", x"0", x"2", x"8", x"0" );
   
   -- Defined 3d MxMxM array of std_logic_vector[4]
   type m_mat_1d is array( 0 to PKG_M-1 ) of std_logic_vector( 3 downto 0 );

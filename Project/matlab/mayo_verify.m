@@ -73,17 +73,22 @@ if ~all( y_long == y_long_golden )
     error("Error: Mismatch between y_long & y_long_golden\n" );
 end
 fprintf("Pass: y_long == y_long_golden\n" );
-
+%%
 F_TAIL_LEN = 5; %Constant
 for idx_o = [m + k * (k + 1) / 2 - 2 : -1 : m]
 
     for idx_i = [1:F_TAIL_LEN]
-        y_long( idx_o - m + idx_i ) = y_long( idx_o - m + idx_i ) + mayo_func.mul_f(y_long( idx_o + 1 ), gf(f_tail_golden(idx_i),4));
+        v = y_long( idx_o - m + idx_i ) + mayo_func.mul_f(y_long( idx_o + 1 ), gf(f_tail_golden(idx_i),4));
+        fprintf("[idx_o]: %d [idx_i]: %d v: %d\n", idx_o, idx_i, v.x );
+        y_long( idx_o - m + idx_i ) = v;
+        %y_long( idx_o - m + idx_i ) = y_long( idx_o - m + idx_i ) + mayo_func.mul_f(y_long( idx_o + 1 ), gf(f_tail_golden(idx_i),4));
+        
     end
     y_long( idx_o + 1 ) = gf(0,4);
     
 end
 y = y_long(1:m);
+
 
 fprintf("Verify Passed?: %d\n", sum( y==y_golden) == m );
 

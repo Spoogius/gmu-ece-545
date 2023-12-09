@@ -22,17 +22,19 @@ entity mayo_verify_datapath is
       clk : in STD_LOGIC;
        rst : in STD_LOGIC;
        en : in STD_LOGIC;
-       done : out STD_LOGIC;
        
        load_p_storage : in std_logic;
        load_s_storage : in std_logic;
        en_compute_y_long : in std_logic;
+       en_collapse_y_long : in std_logic;
        
        done_p_storage : out std_logic;
        done_s_storage : out std_logic;
        done_compute_y_long : out std_logic;
+       rd_y : out std_logic;
        
-       data_in : in std_logic_vector( 7 downto 0 )
+       data_in : in std_logic_vector( 7 downto 0 );
+       y : out std_logic_vector( 3 downto 0 )
     );
 end mayo_verify_datapath;
 
@@ -85,6 +87,16 @@ inst_compute_y_long: entity work.compute_y_long
     P_addr => p_rd_slice_addr,
     P_data => p_rd_slice_data,
     y_long => y_long
+  );
+
+inst_collapse_y_long: entity work.collapse_y_long
+  port map(
+    clk => clk,
+    rst => rst, 
+    en => en_collapse_y_long,
+    y_long => y_long,
+    rd_y => rd_y,
+    y => y
   );
 
 end Behavioral;
