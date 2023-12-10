@@ -26,7 +26,7 @@ architecture Behavioral of collapse_y_long is
 signal idx_i, idx_wr : integer := 0;
 signal idx_o : integer := M + K * (K+1) / 2 - 2;
 signal y_long_reg : m2_mat_1d := ( others => ( others => '0' ) );
-signal y_long_reg_stashed, comp_phase : std_logic := '0';
+signal y_long_reg_stashed, comp_phase, finished: std_logic := '0';
 
 signal mul_f_out: std_logic_vector( 3 downto 0 ) := ( others => '0' );
 
@@ -45,17 +45,19 @@ begin
     y <= ( others => '0' );
     rd_y <= '0';
     idx_wr <= 0;
+    finished <= '0';
   else
-    if( en = '1' and comp_phase = '0' ) then
+    if( en = '1' and comp_phase = '0' and finished = '0' ) then
       if( rising_edge( clk ) ) then
+        rd_y <= '0';
+        y <= ( others => '0' );
         if( idx_wr < M ) then
           y <= y_long_reg( idx_wr );
           rd_y <= '1';
           idx_wr <= idx_wr + 1;
         else
+          finished <= '1';
           idx_wr <= 0;
-          rd_y <= '0';
-          y <= ( others => '0' );
         end if;
       end if; -- r_e(clk)
     end if; -- en

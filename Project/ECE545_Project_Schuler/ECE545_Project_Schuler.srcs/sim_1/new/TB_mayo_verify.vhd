@@ -8,13 +8,13 @@ use std.textio.all;
 
 use work.PKG_matrix_types.all;
 
-entity TB_mayo_verify_datapath is
+entity TB_mayo_verify is
 --  Port ( );
-end TB_mayo_verify_datapath;
+end TB_mayo_verify;
 
-architecture Behavioral of TB_mayo_verify_datapath is
+architecture Behavioral of TB_mayo_verify is
 
-signal clk, rst, en, load_p_storage, load_s_storage, en_compute_y_long, en_collapse_y_long, done_p_storage, done_s_storage, done_compute_y_long, rd_y : std_logic := '0';
+signal clk, rst, en, rd_y : std_logic := '0';
 signal data_in : std_logic_vector( 7 downto 0 ) := ( others => '0' );
 signal y, y_expected : std_logic_vector( 3 downto 0 ) := ( others => '0' );
 
@@ -22,18 +22,11 @@ constant CLK_PERIOD : time := 20 ns;
 
 begin
 
-dut: entity work.mayo_verify_datapath
+dut: entity work.mayo_verify
   port map(
     clk => clk,
     rst => rst,
     en => en,
-    load_p_storage => load_p_storage,
-    load_s_storage => load_s_storage,
-    en_compute_y_long => en_compute_y_long,
-    en_collapse_y_long => en_collapse_y_long,
-    done_p_storage => done_p_storage,
-    done_s_storage => done_s_storage,
-    done_compute_y_long => done_compute_y_long,
     data_in => data_in,
     rd_y => rd_y,
     y => y
@@ -59,44 +52,26 @@ begin
   
   rst <= '0';
   en <= '1';
-  
-  load_p_storage <= '1';
+
   while not endfile( epk_golden_file ) loop
     readline( epk_golden_file, vector_line );
     hread( vector_line, file_epk_data , good=>vector_valid );
     next when not vector_valid;
     
     data_in <= file_epk_data;
-    
     wait for CLK_PERIOD;
   end loop;
   
-  wait until done_p_storage = '1';
-  load_p_storage <= '0';
-  
-  load_s_storage <= '1';
   while not endfile( sig_golden_file ) loop
     readline( sig_golden_file, vector_line );
     hread( vector_line, file_sig_data , good=>vector_valid );
     next when not vector_valid;
 
     data_in <= file_sig_data;
-    
     wait for CLK_PERIOD;
-    
   end loop;
   
-  wait until done_s_storage = '1';
-  load_s_storage <= '0';
-  
-  en_compute_y_long <= '1';
-  wait until done_compute_y_long = '1';
-  en_compute_y_long <= '0';
-  
-  en_collapse_y_long <= '1'; 
-  
   wait until rd_y <= '1';
-  
   while not endfile( y_golden_file ) loop
     readline( y_golden_file, vector_line );
     hread( vector_line, file_y_data , good=>vector_valid );
@@ -107,8 +82,11 @@ begin
     wait for CLK_PERIOD;
   end loop;
   
-  en_collapse_y_long <= '0';
+  wait until rd_y <= '0';
   y_expected <= ( others => '0' );
+  en <= '0';
+
   wait;
+  
 end process;
 end Behavioral;

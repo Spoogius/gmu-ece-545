@@ -84,9 +84,7 @@ begin
   
   wait until p_mat_storage_done = '1';
   load <= '0';
-    
-  
-  
+
   for slice_idx in 0 to PKG_M-1 loop
   --for slice_idx in 0 to 2 loop
     rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );

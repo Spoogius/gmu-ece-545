@@ -7,9 +7,10 @@ package PKG_matrix_types is
   CONSTANT PKG_O : integer := 8;
   CONSTANT PKG_N : integer := 66;
   CONSTANT PKG_K : integer := 9;
-  CONSTANT PKG_P1_BYTES : integer := 54752;
-  CONSTANT PKG_P2_BYTES : integer := 14848;
-  CONSTANT PKG_P3_BYTES : integer := 1152;
+  CONSTANT PKG_P1_BYTES   : integer := 54752;
+  CONSTANT PKG_P2_BYTES   : integer := 14848;
+  CONSTANT PKG_P3_BYTES   : integer := 1152;
+  CONSTANT PKG_SIG_BYTES  : integer := 297;
   CONSTANT PKG_F_TAIL_LEN : integer := 5;
   
   type TYPE_F_TAIL is array( 0 to PKG_F_TAIL_LEN-1 ) of std_logic_vector( 3 downto 0 );

@@ -3,8 +3,6 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
 use IEEE.math_real.all;
 
-library std;
-use std.textio.all;
 
 use work.PKG_matrix_types.all;
 
