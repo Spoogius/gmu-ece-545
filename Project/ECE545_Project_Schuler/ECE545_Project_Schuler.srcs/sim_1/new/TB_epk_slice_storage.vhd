@@ -13,7 +13,7 @@ architecture Behavioral of TB_epk_slice_storage is
 
 signal clk   : std_logic := '0';
 signal rst   : std_logic := '1';
-signal wr_en : std_logic := '0';
+signal wr_mode, wr_done : std_logic := '0';
 signal wr_data_in    : m_mat_1d := (others => (others => '0'));
 signal wr_row_idx    : std_logic_vector( natural(ceil(log2(real(PKG_N)))) - 1 downto 0 ) := (others => '0');
 signal wr_col_idx    : std_logic_vector( natural(ceil(log2(real(PKG_N)))) - 1 downto 0 ) := (others => '0');
@@ -28,10 +28,15 @@ CONSTANT DATA_ROW : m_mat_1d := ( x"1", x"2", x"3", x"4");
 begin
 
 dut: entity work.epk_slice_storage
+  generic map(
+    N => 4,
+    M => 4
+  )
   port map(
     clk => clk,
     rst => rst,
-    wr_en => wr_en,
+    wr_mode => wr_mode,
+    wr_done => wr_done,
     wr_data_in => wr_data_in,
     wr_row_idx => wr_row_idx,
     wr_col_idx => wr_col_idx,
@@ -47,32 +52,25 @@ begin
   
   wait for CLK_PERIOD;
   
-  wr_en <= '1';
-  for row_idx in 0 to PKG_M loop
-    for col_idx in 0 to PKG_M loop
+  wr_mode <= '1';
+  for row_idx in 0 to PKG_M-1 loop
+    for col_idx in 0 to PKG_M-1 loop
     
       wr_col_idx <= std_logic_vector( to_unsigned( col_idx, natural(ceil(log2(real(PKG_N)))) ) );
       wr_row_idx <= std_logic_vector( to_unsigned( row_idx, natural(ceil(log2(real(PKG_N)))) ) );
       wr_data_in <= DATA_ROW;
-      
-      wait for CLK_PERIOD;
+      wait until wr_done = '1';
     end loop;
   end loop;
+  wr_mode <= '0';
+  wait for CLK_PERIOD;
   
   for slice_idx in 0 to PKG_M loop
     rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
     wait for CLK_PERIOD;
   end loop;
+  
 
-  rst <= '1';
-  wait for CLK_PERIOD;
-  rst <= '0';
-  wait for CLK_PERIOD;
-  
-  for slice_idx in 0 to PKG_M loop
-    rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
-    wait for CLK_PERIOD;
-  end loop;
   
   wait;
 end process;

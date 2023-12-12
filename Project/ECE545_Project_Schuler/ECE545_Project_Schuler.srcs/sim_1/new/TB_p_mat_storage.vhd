@@ -19,6 +19,7 @@ signal clk : std_logic := '1';
 signal rst : std_logic := '1';
 signal load  : std_logic := '0';
 signal p_mat_storage_done : std_logic := '0';
+signal rd_data_in, rdy_data_in : std_logic := '0';
 
 signal data_in : std_logic_vector( 7 downto 0 ) := ( others => '0' );
 signal rd_slice_addr : std_logic_vector( natural(log2(real(PKG_M))) - 1 downto 0 ) := ( others => '0' );
@@ -26,6 +27,11 @@ signal rd_slice_data : nxn_mat_2d := ( others => ( others => ( others => '0' ) )
 
 -- DEBUG SIGNALS
 signal rd_data_0_0, rd_data_0_1, rd_data_0_2, rd_data_1_0, rd_data_1_1 : std_logic_vector( 3 downto 0 ) := ( others => '0' );
+signal error_trig : std_logic := '0';
+signal comp_file, comp_sim : std_logic_vector( 3 downto 0 );
+signal comp_valid : std_logic := '0';
+signal comp_row, comp_col : integer := 0;
+
 
 constant CLK_PERIOD : time := 20 ns;
 
@@ -36,6 +42,8 @@ dut: entity work.p_mat_storage
     clk => clk,
     rst => rst,
     load => load,
+    rd_data_in => rd_data_in,
+    rdy_data_in => rdy_data_in,
     done => p_mat_storage_done,
     data_in => data_in, 
     rd_slice_addr  => rd_slice_addr,
@@ -63,6 +71,7 @@ process
   variable total_values : integer := 0;
   variable correct_values : integer := 0;
   
+
 begin
   rst <= '1';
   wait for 4*CLK_PERIOD;
@@ -71,37 +80,54 @@ begin
   load <= '1';
   
   while not endfile( epk_golden_file ) loop
-  --for ii in 0 to 59*PKG_M/2 - 1 loop
-    readline( epk_golden_file, vector_line );
-    hread( vector_line, file_epk_data , good=>vector_valid );
-    next when not vector_valid;
-    
-    data_in <= file_epk_data;
-    
-    wait for CLK_PERIOD;
-    
+  --for ii in 0 to 3*PKG_M/2 - 1 loop
+    if( rdy_data_in = '1' ) then
+      for epk_M_cnt in 0 to 32-1 loop
+        rd_data_in <= '1';
+        readline( epk_golden_file, vector_line );
+        hread( vector_line, file_epk_data , good=>vector_valid );
+        next when not vector_valid;
+        
+        data_in <= file_epk_data;
+        wait for CLK_PERIOD;
+      end loop;
+      rd_data_in <= '0';
+    else
+      rd_data_in <= '0';
+      wait for CLK_PERIOD;
+    end if;
   end loop;
   
+  rd_data_in <= '0';
   wait until p_mat_storage_done = '1';
   load <= '0';
-
+  
   for slice_idx in 0 to PKG_M-1 loop
   --for slice_idx in 0 to 2 loop
     rd_slice_addr <= std_logic_vector( to_unsigned( slice_idx, natural(log2(real(PKG_M))) ) );
     wait for CLK_PERIOD;
       for row_idx in 0 to PKG_N-1 loop
         for col_idx in 0 to PKG_N-1 loop
-          readline( p_golden_file, vector_line );
-          hread( vector_line, file_p_data , good=>vector_valid );
-          next when not vector_valid;
+        
           
-          total_values := total_values + 1;
-          if file_p_data /= rd_slice_data( row_idx )( col_idx ) then
-            report "[Warning] S: " & integer'image(slice_idx) & " R: " & integer'image(row_idx) & " C: " & integer'image(col_idx) & " Expected: " & to_hstring(file_p_data) & " Read: "  & to_hstring(rd_slice_data( row_idx )( col_idx ))
-              severity warning;
-          else
-            correct_values := correct_values + 1;
-          end if;
+            readline( p_golden_file, vector_line );
+            hread( vector_line, file_p_data , good=>vector_valid );
+            next when not vector_valid;
+            
+            
+            comp_sim <= rd_slice_data( row_idx )( col_idx );
+            comp_file <= file_p_data;
+            comp_row <= row_idx;
+            comp_col <= col_idx;
+            comp_valid <= '1' when comp_sim = comp_file else '0';
+            
+            total_values := total_values + 1;
+            if file_p_data /= rd_slice_data( row_idx )( col_idx ) then
+              report "[Warning] S: " & integer'image(slice_idx) & " R: " & integer'image(row_idx) & " C: " & integer'image(col_idx) & " Expected: " & to_hstring(file_p_data) & " Read: "  & to_hstring(rd_slice_data( row_idx )( col_idx ))
+                severity warning;
+            else
+              correct_values := correct_values + 1;
+            end if;
           wait for CLK_PERIOD;
         end loop;
       end loop;

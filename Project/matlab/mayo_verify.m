@@ -79,7 +79,7 @@ for idx_o = [m + k * (k + 1) / 2 - 2 : -1 : m]
 
     for idx_i = [1:F_TAIL_LEN]
         v = y_long( idx_o - m + idx_i ) + mayo_func.mul_f(y_long( idx_o + 1 ), gf(f_tail_golden(idx_i),4));
-        fprintf("[idx_o]: %d [idx_i]: %d v: %d\n", idx_o, idx_i, v.x );
+        %fprintf("[idx_o]: %d [idx_i]: %d v: %d\n", idx_o, idx_i, v.x );
         y_long( idx_o - m + idx_i ) = v;
         %y_long( idx_o - m + idx_i ) = y_long( idx_o - m + idx_i ) + mayo_func.mul_f(y_long( idx_o + 1 ), gf(f_tail_golden(idx_i),4));
         

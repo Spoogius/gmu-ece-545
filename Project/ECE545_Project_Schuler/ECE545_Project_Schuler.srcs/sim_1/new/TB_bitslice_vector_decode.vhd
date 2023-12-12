@@ -28,7 +28,7 @@ constant CLK_PERIOD : time := 20 ns;
 
 begin
 
-dut: entity work.bitslice_vector_decode
+dut: entity work.bitslice_vector_decode_epk
   port map(
     clk => clk,
     rst => rst,

@@ -25,6 +25,8 @@ package PKG_matrix_types is
   type nxn_mat_2d   is array( 0 to PKG_N-1 ) of n_mat_1d;
   type nxnxm_mat_3d is array( 0 to PKG_M-1 ) of nxn_mat_2d;
   
+  -- for epk_slice_storage
+  type nn_mat_1d is array( 0 to (PKG_N*PKG_N) - 1 ) of std_logic_vector( 3 downto 0 );
   -- For y_long
   type m2_mat_1d is array( 0 to (2*PKG_M)-1 ) of std_logic_vector( 3 downto 0 );
   

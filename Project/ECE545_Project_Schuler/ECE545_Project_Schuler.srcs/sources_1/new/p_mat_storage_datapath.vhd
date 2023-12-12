@@ -25,7 +25,8 @@ Generic(
     
     storage_wr_en   : in std_logic;
     storage_row_idx : in std_logic_vector( natural(ceil(log2(real(N)))) - 1 downto 0 );
-    storage_col_idx : in std_logic_vector( natural(ceil(log2(real(N)))) - 1 downto 0 )
+    storage_col_idx : in std_logic_vector( natural(ceil(log2(real(N)))) - 1 downto 0 );
+    storage_wr_done : out std_logic
     
   );
 end p_mat_storage_datapath;
@@ -40,7 +41,8 @@ inst_epk_slice_storage: entity work.epk_slice_storage
   port map(
     clk => clk,
     rst => rst,
-    wr_en => storage_wr_en,
+    wr_mode => storage_wr_en,
+    wr_done => storage_wr_done,
     wr_data_in => bitsliced_data,
     wr_row_idx => storage_row_idx,
     wr_col_idx => storage_col_idx,
