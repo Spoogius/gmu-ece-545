@@ -59,6 +59,8 @@ process( clk, rst )
 begin
   if (rst = '1') then
     curr_state <= waiting;
+    storage_wr_en <= '0';
+    
     rdy_data_in <= '0';
     row_idx <= ( others => '0' );
     row_idx <= ( others => '0' );

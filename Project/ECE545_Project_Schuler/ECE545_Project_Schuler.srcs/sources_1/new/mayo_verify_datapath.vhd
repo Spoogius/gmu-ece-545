@@ -26,6 +26,8 @@ entity mayo_verify_datapath is
        en_compute_y_long : in std_logic;
        en_collapse_y_long : in std_logic;
        
+       p_rd_data_in : in std_logic;
+       p_rdy_data_in : out std_logic;
        done_p_storage : out std_logic;
        done_s_storage : out std_logic;
        done_compute_y_long : out std_logic;
@@ -41,8 +43,10 @@ architecture Behavioral of mayo_verify_datapath is
 signal p_rd_slice_addr : std_logic_vector( natural(log2(real(M))) - 1 downto 0 ) := ( others => '0' );
 signal p_rd_slice_data : nxn_mat_2d := ( others => ( others => ( others => '0' ) ) );
 
+
 signal s_rd_addr_0, s_rd_addr_1 : std_logic_vector( natural(ceil(log2(real(K)))) - 1 downto 0 ) := ( others => '0' );
 signal s_rd_data_0, s_rd_data_1 : n_mat_1d := ( others => ( others => '0' ) );
+
 
 signal y_long : m2_mat_1d := ( others => ( others => '0' ) );
 
@@ -55,6 +59,8 @@ inst_p_mat_storage: entity work.p_mat_storage
     load => load_p_storage,
     done => done_p_storage,
     data_in => data_in,
+    rd_data_in => p_rd_data_in,
+    rdy_data_in => p_rdy_data_in,
     rd_slice_addr => p_rd_slice_addr,
     rd_slice_data => p_rd_slice_data
   );

@@ -20,15 +20,17 @@ entity mayo_verify is
       clk : in STD_LOGIC;
       rst : in STD_LOGIC;
       en : in STD_LOGIC;
-      rd_y : out std_logic;
+      rdy_data_in : out std_logic;
+      rd_data_in : in std_logic;
       data_in : in std_logic_vector( 7 downto 0 );
+      rd_y : out std_logic;
       y : out std_logic_vector( 3 downto 0 )
     );
 end mayo_verify;
 
 architecture Behavioral of mayo_verify is
 
-signal clk_s, rst_s, en_s, rd_y_s, load_p_storage, load_s_storage, en_compute_y_long, en_collapse_y_long, done_p_storage, done_s_storage, done_compute_y_long : std_logic := '0';
+signal clk_s, rst_s, en_s, rd_y_s, load_p_storage, load_s_storage, en_compute_y_long, p_rdy_data_in, en_collapse_y_long, done_p_storage, done_s_storage, done_compute_y_long : std_logic := '0';
 
 begin
 
@@ -43,6 +45,8 @@ mayo_verify_datapath: entity work.mayo_verify_datapath
     load_s_storage => load_s_storage,
     en_compute_y_long => en_compute_y_long,
     en_collapse_y_long => en_collapse_y_long,
+    p_rdy_data_in => p_rdy_data_in,
+    p_rd_data_in => load_p_storage,
     done_p_storage => done_p_storage,
     done_s_storage => done_s_storage,
     done_compute_y_long => done_compute_y_long,
@@ -60,6 +64,9 @@ mayo_verify_controller: entity work.mayo_verify_controller
     load_s_storage => load_s_storage,
     en_compute_y_long => en_compute_y_long,
     en_collapse_y_long => en_collapse_y_long,
+    rd_data_in => rd_data_in,
+    rdy_data_in => rdy_data_in,
+    p_rdy_data_in => p_rdy_data_in,
     done_p_storage => done_p_storage,
     done_s_storage => done_s_storage,
     done_compute_y_long => done_compute_y_long,

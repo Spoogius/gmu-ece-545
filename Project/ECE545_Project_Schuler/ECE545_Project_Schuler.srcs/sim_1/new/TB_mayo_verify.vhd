@@ -14,7 +14,8 @@ end TB_mayo_verify;
 
 architecture Behavioral of TB_mayo_verify is
 
-signal clk, rst, en, rd_y : std_logic := '0';
+signal clk : std_logic := '1'; 
+signal rst, en, rd_y, rd_data_in, rdy_data_in : std_logic := '0';
 signal data_in : std_logic_vector( 7 downto 0 ) := ( others => '0' );
 signal y, y_expected : std_logic_vector( 3 downto 0 ) := ( others => '0' );
 
@@ -27,6 +28,8 @@ dut: entity work.mayo_verify
     clk => clk,
     rst => rst,
     en => en,
+    rdy_data_in => rdy_data_in,
+    rd_data_in => rd_data_in,
     data_in => data_in,
     rd_y => rd_y,
     y => y
@@ -54,13 +57,25 @@ begin
   en <= '1';
 
   while not endfile( epk_golden_file ) loop
-    readline( epk_golden_file, vector_line );
-    hread( vector_line, file_epk_data , good=>vector_valid );
-    next when not vector_valid;
-    
-    data_in <= file_epk_data;
-    wait for CLK_PERIOD;
+    if( rdy_data_in = '1' ) then
+      for epk_M_div_2_cnt in 0 to PKG_M/2 - 1 loop
+        rd_data_in <= '1';
+        readline( epk_golden_file, vector_line );
+        hread( vector_line, file_epk_data , good=>vector_valid );
+        next when not vector_valid;
+        
+        data_in <= file_epk_data;
+        wait for CLK_PERIOD;
+      end loop;
+      rd_data_in <= '0';
+    else
+      rd_data_in <= '0';
+      wait for CLK_PERIOD;
+    end if;
   end loop;
+  
+  wait until rdy_data_in <= '1';
+  rd_data_in <= '1';
   
   while not endfile( sig_golden_file ) loop
     readline( sig_golden_file, vector_line );
@@ -70,6 +85,7 @@ begin
     data_in <= file_sig_data;
     wait for CLK_PERIOD;
   end loop;
+  rd_data_in <= '0';
   
   wait until rd_y <= '1';
   while not endfile( y_golden_file ) loop
