@@ -48,6 +48,9 @@ process
   variable file_epk_data : std_logic_vector( 7 downto 0 );
   variable file_sig_data : std_logic_vector( 7 downto 0 );
   variable file_y_data : std_logic_vector( 3 downto 0 );
+  
+  variable total_values : integer := 0;
+  variable correct_values : integer := 0;
 begin
   
   rst <= '1';
@@ -95,12 +98,30 @@ begin
 
     y_expected <= file_y_data;
     
-    wait for CLK_PERIOD;
+    wait for CLK_PERIOD/2;
+    total_values := total_values + 1;
+    if y_expected /= y then
+      report "[Warning] y mismatch at index: " & integer'image(total_values) & " Expected: " & to_hstring(y_expected) & " Read: "  & to_hstring(y)
+        severity warning;
+    else
+      correct_values := correct_values + 1;
+    end if;
+    wait for CLK_PERIOD/2;
   end loop;
   
   wait until rd_y <= '0';
   y_expected <= ( others => '0' );
   en <= '0';
+
+  if correct_values = total_values then
+    report
+      "All " & integer'image(total_values) & " values in y match the expected values in y_golden.ascii"
+        severity note;
+  else
+    report
+      "[Error] " & integer'image(correct_values) & " out of " & integer'image(total_values) & " values in y match the expected values in y_golden.ascii"
+        severity error;
+  end if;
 
   wait;
   
